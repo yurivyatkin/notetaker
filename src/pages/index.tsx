@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 
 import { api, type RouterOutputs } from "../utils/api";
 import { Header } from "~/components/Header";
-
+import { NoteEditor } from "~/components/NoteEditor";
 
 const Home: NextPage = () => {
   return (
@@ -30,7 +30,7 @@ type Topic = RouterOutputs["topic"]["getAll"][0];
 const Content: React.FC = () => {
   const { data: sessionData } = useSession();
 
-  const [ selectedTopic, setSelectedTopic ] = useState<Topic | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
 
   const { data: topics, refetch: refetchTopics } = api.topic.getAll.useQuery(
     undefined,
@@ -38,15 +38,30 @@ const Content: React.FC = () => {
       enabled: sessionData?.user !== undefined,
       onSuccess: (data) => {
         setSelectedTopic(selectedTopic ?? data[0] ?? null);
-      }
+      },
     }
   );
 
-  const createTopic =  api.topic.create.useMutation({
+  const createTopic = api.topic.create.useMutation({
     onSuccess() {
       void refetchTopics();
     },
-  })
+  });
+
+  const { data: notes, refetch: refetcNotes } = api.note.getAll.useQuery(
+    {
+      topicId: selectedTopic?.id ?? "",
+    },
+    {
+      enabled: sessionData?.user !== undefined && selectedTopic !== null,
+    }
+  );
+
+  const createNote = api.note.create.useMutation({
+    onSuccess: () => {
+      void refetcNotes();
+    },
+  });
 
   return (
     <div className="mx-5 mt-5 grid grid-cols-4 gap-2">
@@ -61,10 +76,10 @@ const Content: React.FC = () => {
                   setSelectedTopic(topic);
                 }}
               >
-               {topic.title}
+                {topic.title}
               </a>
             </li>
-          ))}          
+          ))}
         </ul>
         <div className="divider"></div>
         <input
@@ -81,7 +96,17 @@ const Content: React.FC = () => {
           }}
         />
       </div>
-      <div className="col-span-3"></div>
+      <div className="col-span-3">
+        <NoteEditor
+          onSave={({ title, content }) => {
+            void createNote.mutate({
+              title,
+              content,
+              topicId: selectedTopic?.id ?? "",
+            });
+          }}
+        />
+      </div>
     </div>
   );
-}
+};
