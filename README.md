@@ -74,6 +74,18 @@ Any method will do.
 
 One of the advantages of Supabase is its web console, but it also provides other useful features, including authentication, cloud storage, and auto-generated APIs.
 
+### API documentation: tRPC way
+
+This project uses [tRPC.panel()](https://trpcpanel.io/docs) for documenting and testing tRPC endpoints.
+It has a Swagger-like UI and allows executing endpoints and inspecting their behaviour, e.g., validation.
+
+To access the tRPC panel, add `/api/panel` to the end of the base URL of your app.
+Thus, locally, one can open http://localhost:3000/api/panel to see the tRPC panel.
+
+The endpoints behave differently in authenticated and non-authenticated states.
+Currently, it is enabled in the production environment too.
+Perhaps, we should disable it in production for real-world applications.
+
 ## How to run this project?
 
 Clone the repository to your local machine:
